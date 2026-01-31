@@ -10,7 +10,12 @@ export const Table: React.FC<TableProps> = ({
     data,
     onSelectionChange,
     onPageChange,
-    onLimitChange
+    onLimitChange,
+    page,
+    limit,
+    totalPages,
+    handleUpdateData,
+    handleDeleteData,
 }) => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -75,15 +80,17 @@ export const Table: React.FC<TableProps> = ({
                             columns={columns}
                             isSelected={selectedIds.includes(item.id)}
                             onSelect={() => toggleSelectOne(item.id)}
+                            handleUpdateData={handleUpdateData}
+                            handleDeleteData={handleDeleteData}
                         />
                     ))}
                 </tbody>
             </table>
 
             <Pagination
-                page={1}
-                total={20}
-                limit={10}
+                page={page}
+                limit={limit}
+                totalPages={totalPages}
                 onPageChange={onPageChange}
                 onLimitChange={onLimitChange}/>
         </div>

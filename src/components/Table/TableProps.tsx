@@ -2,6 +2,7 @@ interface TableColumn {
     key: string;
     label: string;
     sortable?: boolean;
+    date?: boolean;
 }
 
 interface TableItem {
@@ -10,10 +11,12 @@ interface TableItem {
 }
 
 export interface TableRowProps {
-  item: TableItem;
-  columns: TableColumn[];
-  isSelected: boolean;
-  onSelect: () => void;
+    item: TableItem;
+    columns: TableColumn[];
+    isSelected: boolean;
+    onSelect: () => void;
+    handleUpdateData?: () => void;
+    handleDeleteData?: (id: number) => void;
 }
 
 export interface TableProps {
@@ -22,4 +25,9 @@ export interface TableProps {
     onSelectionChange?: (selectedIds: string[]) => void;
     onPageChange: (page: number) => void;
     onLimitChange: (limit: number) => void;
+    page: number;
+    limit: number;
+    totalPages: number;
+    handleUpdateData?: () => void;
+    handleDeleteData?: (id: number) => void;
 }
