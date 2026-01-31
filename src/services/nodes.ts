@@ -49,3 +49,10 @@ export async function deleteNode(id: number) {
     method: "DELETE",
   });
 }
+
+export async function deleteNodes(ids: number[]) {
+  return apiClient(`v1/nodes`, {
+    method: "DELETE",
+    body: { ids },
+  });
+}

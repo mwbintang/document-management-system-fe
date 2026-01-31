@@ -9,7 +9,7 @@ import { Pagination } from "../components/Pagination";
 import { Input } from "../components/Input";
 import { Modal } from "../components/Modal";
 import { Plus, Upload } from "lucide-react";
-import { createNodes, deleteNode, fetchNodes } from "../services/nodes";
+import { createNodes, deleteNode, deleteNodes, fetchNodes } from "../services/nodes";
 import { useDebounceFn } from "../lib/hooks/useDebounce";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -50,7 +50,7 @@ export default function Page() {
   const [descriptionFile, setDescriptionFile] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const handleSubmitFolder = async () => {
     try {
@@ -165,7 +165,7 @@ export default function Page() {
     };
   };
 
-  const handleSelectionChange = (ids: string[]) => {
+  const handleSelectionChange = (ids: number[]) => {
     setSelectedIds(ids);
   };
 
@@ -195,16 +195,10 @@ export default function Page() {
     try {
       setLoading(true);
 
-      // await Promise.all(
-      //   selectedIds.map((id) =>
-      //     apiClient(`v1/nodes/${id}`, {
-      //       method: "DELETE",
-      //     })
-      //   )
-      // );
+      await deleteNodes(selectedIds);
 
-      setSelectedIds([]);
       fetchData(); // refresh table
+      setSelectedIds([]);
     } catch (error) {
       console.error("Error deleting selected items:", error);
     } finally {
@@ -267,7 +261,7 @@ export default function Page() {
       >
         Delete Selected ({selectedIds.length})
       </button>}
-
+      
       <Table
         columns={columns}
         data={nodes}
@@ -279,6 +273,7 @@ export default function Page() {
         totalPages={totalPages}
         handleUpdateData={handleUpdateData}
         handleDeleteData={handleDeleteData}
+        loading={loading}
       />
     </div>
   );

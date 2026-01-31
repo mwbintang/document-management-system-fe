@@ -6,7 +6,7 @@ interface TableColumn {
 }
 
 interface TableItem {
-    id: string;
+    id: number;
     [key: string]: any;
 }
 
@@ -22,7 +22,7 @@ export interface TableRowProps {
 export interface TableProps {
     columns: TableColumn[];
     data: TableItem[];
-    onSelectionChange?: (selectedIds: string[]) => void;
+    onSelectionChange?: (selectedIds: number[]) => void;
     onPageChange: (page: number) => void;
     onLimitChange: (limit: number) => void;
     page: number;
@@ -30,4 +30,5 @@ export interface TableProps {
     totalPages: number;
     handleUpdateData?: () => void;
     handleDeleteData?: (id: number) => void;
+    loading: boolean;
 }
