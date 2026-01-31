@@ -1,20 +1,11 @@
 "use client";
 
 import React from "react";
+import { FolderFormModalProps } from "./ModalProps";
 
-interface CreateFolderModalProps {
-  title?: string;
-  name: string;
-  description: string;
-  loading?: boolean;
-  onNameChange: (value: string) => void;
-  onDescriptionChange: (value: string) => void;
-  onSubmit: () => void;
-  onCancel: () => void;
-}
-
-export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
-  title = "Create Folder",
+export const FolderFormModal: React.FC<FolderFormModalProps> = ({
+  title,
+  submitLabel,
   name,
   description,
   loading = false,
@@ -81,10 +72,10 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
 
           <button
             type="submit"
-            disabled={loading || !name || !description}
+            disabled={loading || !name}
             className="px-4 py-2 rounded-md border text-sm disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create"}
+            {loading ? "Saving..." : submitLabel}
           </button>
         </div>
       </form>

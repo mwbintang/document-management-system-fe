@@ -9,12 +9,12 @@ import { Pagination } from "../components/Pagination";
 import { Input } from "../components/Input";
 import { Modal } from "../components/Modal";
 import { Plus, Upload } from "lucide-react";
-import { createNodes, deleteNode, deleteNodes, fetchNodes } from "../services/nodes";
+import { createNodes, deleteNode, deleteNodes, fetchNode, fetchNodes, updateNodes } from "../services/nodes";
 import { useDebounceFn } from "../lib/hooks/useDebounce";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { UploadFileModal } from "../components/Modal/UploadFileModal";
-import { CreateFolderModal } from "../components/Modal/CreateFolderModal";
+import { FileFormModal } from "../components/Modal/FileFormModal";
+import { FolderFormModal } from "../components/Modal/FolderFormModal";
 
 const columns = [
   { key: "name", label: "Name", sortable: true },
@@ -38,23 +38,50 @@ export default function Page() {
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
-  const [open, setOpen] = useState<boolean>(false);
-  const [name, setName] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [nodes, setNodes] = useState<any[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [nodes, setNodes] = useState<any[]>([]);
+  // const [open, setOpen] = useState<boolean>(false);
+  // const [name, setName] = useState<string>("");
   const [openFileModal, setOpenFileModal] = useState<boolean>(false);
   const [openFolderModal, setOpenFolderModal] = useState<boolean>(false);
+
   const [folderName, setFolderName] = useState<string>("");
   const [folderDescription, setFolderDescription] = useState<string>("");
-  const [descriptionFile, setDescriptionFile] = useState<string>("");
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [descriptionFile, setDescriptionFile] = useState<string>("");
+  const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
+
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const handleSubmitFolder = async () => {
     try {
       setLoading(true);
+
+      if (selectedNodeId) {
+        // Update existing folder logic can be added here
+        await updateNodes(selectedNodeId, {
+          name: folderName,
+          description: folderDescription
+        });
+
+        setPage(1); // reset to first page
+        setSearch(""); // reset search
+
+        await fetchData();
+
+        setOpenFolderModal(false);
+        setFolderName("");
+        setFolderDescription("");
+        setSelectedNodeId(null);
+
+        return;
+      }
+
       await createNodes({
         name: folderName,
         description: folderDescription,
@@ -77,7 +104,7 @@ export default function Page() {
     }
   };
 
-  const handleSubmitFile = async () => {
+  const handleCreateFile = async () => {
     try {
       if (!selectedFile) return;
 
@@ -107,6 +134,39 @@ export default function Page() {
       setLoading(false);
     }
   };
+
+  const handleUpdateFile = async () => {
+    try {
+      if (!selectedNodeId) return;
+
+      setLoading(true);
+
+      const formData = new FormData();
+      if (selectedFile) {
+        formData.append("file", selectedFile); // must match multer field name
+      }
+      
+      formData.append("description", descriptionFile);
+
+      await updateNodes(selectedNodeId, formData);
+      
+      setPage(1); // reset to first page
+      setSearch(""); // reset search
+
+      await fetchData();
+
+      setOpenFileModal(false);
+      setSelectedFile(null);
+      setDescriptionFile("");
+      setSelectedNodeId(null);
+    }
+    catch (error) {
+      console.error("Error updating file:", error);
+    }
+    finally {
+      setLoading(false);
+    }
+  }
 
 
   const handleSaveFile = (file: File | null) => {
@@ -145,10 +205,36 @@ export default function Page() {
     }
   };
 
-  const handleUpdateData = async () => {
-    console.log("Handle update data");
-    // await fetchData();
-  }
+  const handleUpdateData = async (id: number) => {
+    try {
+      setLoading(true);
+
+      const node = await fetchNode(id);
+      if (!node) return;
+
+      setSelectedNodeId(id);
+
+      if (node.type === "FOLDER") {
+        // ✅ Folder update flow
+        setFolderName(node.name || "");
+        setFolderDescription(node.description || "");
+        setOpenFolderModal(true);
+        return;
+      }
+
+      if (node.type === "FILE") {
+        // ✅ File update flow
+        setDescriptionFile(node.description || "");
+        setSelectedFile(null); // optional: keep null to mean "keep existing file"
+        setOpenFileModal(true);
+        return;
+      }
+    } catch (error) {
+      console.error("Error fetching node details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDeleteData = async (id: number) => {
     try {
@@ -168,6 +254,20 @@ export default function Page() {
   const handleSelectionChange = (ids: number[]) => {
     setSelectedIds(ids);
   };
+
+  const handleCancelFolderModal = () => {
+    setOpenFolderModal(false);
+    setFolderName("");
+    setFolderDescription("");
+    setSelectedNodeId(null);
+  }
+
+  const handleCancelFileModal = () => {
+    setOpenFileModal(false);
+    setSelectedFile(null);
+    setDescriptionFile("");
+    setSelectedNodeId(null);
+  }
 
 
   // const handleApply = useDebounceFn(() => {
@@ -229,25 +329,29 @@ export default function Page() {
 
       {
         openFileModal && (
-          <UploadFileModal
-            onCancel={() => setOpenFileModal(false)}
-            onSubmit={handleSubmitFile}
+          <FileFormModal
+            onCancel={handleCancelFileModal}
+            onSubmit={selectedFile ? handleUpdateFile : handleCreateFile}
             file={selectedFile}
             description={descriptionFile}
             onFileChange={handleSaveFile}
             onDescriptionChange={(e) => setDescriptionFile(e)}
+            loading={loading}
           />
         )
       }
       {
         openFolderModal && (
-          <CreateFolderModal
-            onCancel={() => setOpenFolderModal(false)}
+          <FolderFormModal
+            onCancel={handleCancelFolderModal}
             name={folderName}
             description={folderDescription}
             onNameChange={setFolderName}
             onDescriptionChange={setFolderDescription}
             onSubmit={handleSubmitFolder}
+            submitLabel={selectedNodeId ? "Update Folder" : "Create Folder"}
+            title={selectedNodeId ? "Update Folder" : "Create New Folder"}
+            loading={loading}
           />
         )
       }
@@ -261,7 +365,7 @@ export default function Page() {
       >
         Delete Selected ({selectedIds.length})
       </button>}
-      
+
       <Table
         columns={columns}
         data={nodes}

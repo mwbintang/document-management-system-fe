@@ -1,20 +1,11 @@
 "use client";
 
 import React from "react";
+import { FileFormModalProps } from "./ModalProps";
 
-interface UploadFileModalProps {
-  title?: string;
-  file: File | null;
-  description: string;
-  loading?: boolean;
-  onFileChange: (file: File | null) => void;
-  onDescriptionChange: (value: string) => void;
-  onSubmit: () => void;
-  onCancel: () => void;
-}
-
-export const UploadFileModal: React.FC<UploadFileModalProps> = ({
-  title = "Upload File",
+export const FileFormModal: React.FC<FileFormModalProps> = ({
+  mode = "create",
+  title,
   file,
   description,
   loading = false,
@@ -23,6 +14,8 @@ export const UploadFileModal: React.FC<UploadFileModalProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const isCreate = mode === "create";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
@@ -40,23 +33,34 @@ export const UploadFileModal: React.FC<UploadFileModalProps> = ({
       >
         {/* Header */}
         <div className="border-b px-4 py-3 font-medium">
-          {title}
+          {title ?? (isCreate ? "Upload File" : "Update File")}
         </div>
 
         {/* Body */}
         <div className="p-4 space-y-4">
+          {/* File input */}
           <div className="space-y-1">
-            <label className="text-sm font-medium">File</label>
+            <label className="text-sm font-medium">
+              File {isCreate ? "" : "(optional)"}
+            </label>
+
             <input
               type="file"
               onChange={(e) =>
                 onFileChange(e.target.files?.[0] ?? null)
               }
               className="w-full text-sm"
-              required
+              required={isCreate}
             />
+
+            {!isCreate && (
+              <p className="text-xs text-gray-500">
+                Leave empty to keep the existing file
+              </p>
+            )}
           </div>
 
+          {/* Description */}
           <div className="space-y-1">
             <label className="text-sm font-medium">Description</label>
             <textarea
@@ -81,10 +85,16 @@ export const UploadFileModal: React.FC<UploadFileModalProps> = ({
 
           <button
             type="submit"
-            disabled={loading || !file || !description}
+            disabled={loading || (isCreate && !file)}
             className="px-4 py-2 rounded-md border text-sm disabled:opacity-50"
           >
-            {loading ? "Uploading..." : "Upload"}
+            {loading
+              ? isCreate
+                ? "Uploading..."
+                : "Updating..."
+              : isCreate
+              ? "Upload"
+              : "Update"}
           </button>
         </div>
       </form>

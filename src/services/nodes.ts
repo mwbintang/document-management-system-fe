@@ -56,3 +56,40 @@ export async function deleteNodes(ids: number[]) {
     body: { ids },
   });
 }
+
+export async function fetchNode(id: number) {
+  return apiClient(`v1/nodes/${id}`, {
+    method: "GET",
+  });
+}
+
+export async function updateNodes(
+  id: string | number,
+  data:
+    | {
+        name?: string;
+        description?: string;
+        parent_id?: string | null;
+      }
+    | FormData
+) {
+  // FILE update (FormData)
+  if (data instanceof FormData) {
+    data.append("updated_by", "1");
+
+    return apiClient(`v1/nodes/${id}`, {
+      method: "PUT",
+      body: data,
+      file: true,
+    });
+  }
+
+  // FOLDER / metadata update (JSON)
+  return apiClient(`v1/nodes/${id}`, {
+    method: "PUT",
+    body: {
+      ...data,
+      updated_by: 1,
+    },
+  });
+}

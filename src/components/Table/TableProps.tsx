@@ -15,7 +15,7 @@ export interface TableRowProps {
     columns: TableColumn[];
     isSelected: boolean;
     onSelect: () => void;
-    handleUpdateData?: () => void;
+    handleUpdateData?: (id: number) => void;
     handleDeleteData?: (id: number) => void;
 }
 
@@ -28,7 +28,7 @@ export interface TableProps {
     page: number;
     limit: number;
     totalPages: number;
-    handleUpdateData?: () => void;
+    handleUpdateData?: (id: number) => void;
     handleDeleteData?: (id: number) => void;
     loading: boolean;
 }

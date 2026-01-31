@@ -63,16 +63,16 @@ export const TableRow: React.FC<TableRowProps> = ({
           </button>
 
           {open && (
-            <div className="absolute right-0 mt-2 w-32 rounded-md border bg-white shadow-lg z-10">
+            <div className="absolute right-0 mt-2 w-32 rounded-md border bg-white shadow-lg z-50">
               <button
-                // onClick={handleUpdate}
+                onClick={() => handleUpdateData && handleUpdateData(item.id)}
                 className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
               >
                 Update
               </button>
 
               <button
-                onClick={handleDeleteData ? () => handleDeleteData(Number(item.id)) : () => {}}
+                onClick={handleDeleteData ? () => handleDeleteData(item.id) : () => {}}
                 className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
               >
                 Delete
