@@ -15,18 +15,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { FileFormModal } from "../components/Modal/FileFormModal";
 import { FolderFormModal } from "../components/Modal/FolderFormModal";
+import { API_BASE_URL } from "../lib/constants/env";
 
 const columns = [
   { key: "name", label: "Name", sortable: true },
   { key: "username", label: "Created by" },
   { key: "created_at", label: "Date", sortable: true, date: true },
   { key: "size", label: "Size" },
-];
-
-const data = [
-  { id: "1", name: "Bintang", createdBy: "bintang@mail.com", date: "2023-01-01", size: "10MB" },
-  { id: "2", name: "Jordy", createdBy: "jordy@mail.com", date: "2023-01-02", size: "15MB" },
-  { id: "3", name: "Sarah", createdBy: "sarah@mail.com", date: "2023-01-03", size: "20MB" },
 ];
 
 
@@ -55,8 +50,11 @@ export default function Page() {
   const [descriptionFile, setDescriptionFile] = useState<string>("");
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
 
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [selectedFolderParentId, setSelectedFolderParentId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const [orderBy, setOrderBy] = useState<string>("");
+  const [orderDirection, setOrderDirection] = useState<string>("");
 
   const handleSubmitFolder = async () => {
     try {
@@ -86,7 +84,7 @@ export default function Page() {
         name: folderName,
         description: folderDescription,
         type: "FOLDER",
-        parent_id: selectedFolder
+        parent_id: selectedFolderParentId,
       });
 
       setPage(1); // reset to first page
@@ -114,8 +112,8 @@ export default function Page() {
       formData.append("file", selectedFile); // must match multer field name
       formData.append("type", "FILE");
       formData.append("description", descriptionFile);
-      if (selectedFolder) {
-        formData.append("parent_id", selectedFolder);
+      if (selectedFolderParentId) {
+        formData.append("parent_id", selectedFolderParentId.toString());
       }
 
       await createNodes(formData);
@@ -145,11 +143,11 @@ export default function Page() {
       if (selectedFile) {
         formData.append("file", selectedFile); // must match multer field name
       }
-      
+
       formData.append("description", descriptionFile);
 
       await updateNodes(selectedNodeId, formData);
-      
+
       setPage(1); // reset to first page
       setSearch(""); // reset search
 
@@ -166,8 +164,7 @@ export default function Page() {
     finally {
       setLoading(false);
     }
-  }
-
+  };
 
   const handleSaveFile = (file: File | null) => {
     if (!file) {
@@ -194,7 +191,7 @@ export default function Page() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const nodesRespo = await fetchNodes(page, limit, search);
+      const nodesRespo = await fetchNodes(page, limit, search, selectedFolderParentId, orderBy, orderDirection);
       setNodes(nodesRespo.data);
       setTotalPages(nodesRespo.meta.totalPages);
 
@@ -260,14 +257,14 @@ export default function Page() {
     setFolderName("");
     setFolderDescription("");
     setSelectedNodeId(null);
-  }
+  };
 
   const handleCancelFileModal = () => {
     setOpenFileModal(false);
     setSelectedFile(null);
     setDescriptionFile("");
     setSelectedNodeId(null);
-  }
+  };
 
 
   // const handleApply = useDebounceFn(() => {
@@ -283,6 +280,23 @@ export default function Page() {
   //   setSearch(e.target.value);
   //   handleApply();
   // };
+
+  const handleClickDetail = async (id: number) => {
+    try {
+      const detailData = nodes.find((node) => node.id === id);
+      if (!detailData) return;
+
+      if (detailData.type === "FOLDER") {
+        setSelectedFolderParentId(id);
+      } else if (detailData.type === "FILE") {
+        window.open(`${API_BASE_URL}v1/nodes/${id}/download`, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      console.error("Error navigating to detail page:", error);
+    } finally {
+
+    }
+  }
 
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) return;
@@ -309,11 +323,24 @@ export default function Page() {
   const limitHandleChange = (newLimit: number) => {
     setLimit(newLimit);
     setPage(1); // reset page
-  }
+  };
+
+  const handleSort = (key: string) => {
+    const isSameColumn = orderBy === key;
+    const nextDirection =
+      isSameColumn
+        ? orderDirection === "ASC"
+          ? "DESC"
+          : "ASC"
+        : "DESC";
+
+    setOrderBy(key);
+    setOrderDirection(nextDirection);
+  };
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, search]);
+  }, [page, limit, search, selectedFolderParentId, orderDirection]);
 
   return (
     <div className="p-6">
@@ -331,7 +358,7 @@ export default function Page() {
         openFileModal && (
           <FileFormModal
             onCancel={handleCancelFileModal}
-            onSubmit={selectedFile ? handleUpdateFile : handleCreateFile}
+            onSubmit={selectedNodeId ? handleUpdateFile : handleCreateFile}
             file={selectedFile}
             description={descriptionFile}
             onFileChange={handleSaveFile}
@@ -378,6 +405,10 @@ export default function Page() {
         handleUpdateData={handleUpdateData}
         handleDeleteData={handleDeleteData}
         loading={loading}
+        handleClickDetail={handleClickDetail}
+        onSortChange={handleSort}
+        orderBy={orderBy}
+        orderDirection={orderDirection}
       />
     </div>
   );

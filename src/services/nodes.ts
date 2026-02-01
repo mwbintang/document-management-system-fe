@@ -1,11 +1,15 @@
 import { apiClient } from "../lib/apiClient";
+import { mockUserId } from "../lib/constants/mockData";
 
 export async function fetchNodes(
   page: number,
   limit: number,
-  search: string
+  search: string,
+  parent_id?: number | null,
+  orderBy?: string,
+  orderDirection?: string
 ) {
-  return apiClient(`v1/nodes?page=${page}&limit=${limit}&search=${search}`, {
+  return apiClient(`v1/nodes?page=${page}&limit=${limit}&search=${search}&parentId=${parent_id || ""}&orderBy=${orderBy || "created_at"}&orderDirection=${orderDirection || "DESC"}`, {
     method: "GET",
   });
 }
@@ -16,14 +20,14 @@ export async function createNodes(
         name?: string;
         description: string;
         type: "FILE" | "FOLDER";
-        parent_id?: string | null;
+        parent_id?: number | null;
       }
     | FormData
 ) {
   // FILE upload (FormData)
   if (data instanceof FormData) {
-    data.append("created_by", "1");
-    data.append("updated_by", "1");
+    data.append("created_by", mockUserId.toString());
+    data.append("updated_by", mockUserId.toString());
 
     return apiClient("v1/nodes", {
       method: "POST",
@@ -37,8 +41,8 @@ export async function createNodes(
     method: "POST",
     body: {
       ...data,
-      created_by: 1,
-      updated_by: 1,
+      created_by: mockUserId,
+      updated_by: mockUserId,
     },
     file: false,
   });
@@ -75,7 +79,7 @@ export async function updateNodes(
 ) {
   // FILE update (FormData)
   if (data instanceof FormData) {
-    data.append("updated_by", "1");
+    data.append("updated_by", mockUserId.toString());
 
     return apiClient(`v1/nodes/${id}`, {
       method: "PUT",
@@ -89,7 +93,7 @@ export async function updateNodes(
     method: "PUT",
     body: {
       ...data,
-      updated_by: 1,
+      updated_by: mockUserId,
     },
   });
 }

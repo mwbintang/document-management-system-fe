@@ -12,12 +12,16 @@ export const Table: React.FC<TableProps> = ({
   onSelectionChange,
   onPageChange,
   onLimitChange,
+  onSortChange,
   page,
   limit,
   totalPages,
   handleUpdateData,
   handleDeleteData,
   loading,
+  handleClickDetail,
+  orderBy,
+  orderDirection
 }) => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
@@ -39,6 +43,11 @@ export const Table: React.FC<TableProps> = ({
     onSelectionChange?.(newSelected);
   };
 
+  const getSortIcon = (key: string) => {
+    if (orderBy !== key) return "↓";
+    return orderDirection === "ASC" ? "↓" : "↑";
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border border-gray-200 rounded-lg">
@@ -56,13 +65,17 @@ export const Table: React.FC<TableProps> = ({
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="p-3 border-b text-left font-medium"
+                className={`p-3 border-b text-left font-medium ${col.sortable ? "cursor-pointer select-none" : ""
+                  }`}
+                onClick={() =>
+                  col.sortable && onSortChange && onSortChange(col.key)
+                }
               >
                 <div className="flex items-center gap-1">
                   {col.label}
                   {col.sortable && (
-                    <span className="text-xs text-gray-400 cursor-pointer">
-                      ⇅
+                    <span className="text-xs text-gray-500">
+                      {getSortIcon(col.key)}
                     </span>
                   )}
                 </div>
@@ -74,7 +87,6 @@ export const Table: React.FC<TableProps> = ({
         </thead>
 
         <tbody>
-          {/* ✅ Loading state */}
           {loading && (
             <tr>
               <td colSpan={columns.length + 2} className="h-40">
@@ -85,7 +97,6 @@ export const Table: React.FC<TableProps> = ({
             </tr>
           )}
 
-          {/* ✅ Data rows */}
           {!loading &&
             data.map((item) => (
               <TableRow
@@ -96,10 +107,10 @@ export const Table: React.FC<TableProps> = ({
                 onSelect={() => toggleSelectOne(item.id)}
                 handleUpdateData={handleUpdateData}
                 handleDeleteData={handleDeleteData}
+                handleClickDetail={handleClickDetail}
               />
             ))}
 
-          {/* ✅ Empty state */}
           {!loading && data.length === 0 && (
             <tr>
               <td
@@ -113,7 +124,6 @@ export const Table: React.FC<TableProps> = ({
         </tbody>
       </table>
 
-      {/* ✅ Hide pagination while loading */}
       {!loading && (
         <Pagination
           page={page}

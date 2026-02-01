@@ -1,6 +1,8 @@
 // import { encryptPayload } from "./crypto-utils";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+import { API_BASE_URL } from "./constants/env";
+
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 // const AES_KEY = process.env.NEXT_PUBLIC_AES_HEX_KEY;
 // const HMAC_KEY = process.env.NEXT_PUBLIC_HMAC_KEY;
 

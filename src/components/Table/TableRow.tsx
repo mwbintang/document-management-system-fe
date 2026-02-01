@@ -9,6 +9,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   onSelect,
   handleUpdateData,
   handleDeleteData,
+  handleClickDetail
 }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -47,7 +48,11 @@ export const TableRow: React.FC<TableRowProps> = ({
       </td>
 
       {columns.map((col) => (
-        <td key={col.key} className="p-3 border-b">
+        <td
+          key={col.key}
+          className={`p-3 border-b ${handleClickDetail ? 'cursor-pointer' : ''}`}
+          onClick={() => handleClickDetail && handleClickDetail(item.id)}
+        >
           {col.date ? formatDate(item[col.key]) : item[col.key]}
         </td>
       ))}
@@ -56,7 +61,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       <td className="p-3 border-b text-right relative">
         <div ref={dropdownRef} className="inline-block text-left">
           <button
-            className="px-2 py-1 text-gray-500 hover:text-black"
+            className="px-2 py-1 text-gray-500 cursor-pointer hover:text-black"
             onClick={() => setOpen((prev) => !prev)}
           >
             ⋯
@@ -72,7 +77,7 @@ export const TableRow: React.FC<TableRowProps> = ({
               </button>
 
               <button
-                onClick={handleDeleteData ? () => handleDeleteData(item.id) : () => {}}
+                onClick={handleDeleteData ? () => handleDeleteData(item.id) : () => { }}
                 className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
               >
                 Delete

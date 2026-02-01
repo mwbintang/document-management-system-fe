@@ -17,6 +17,7 @@ export interface TableRowProps {
     onSelect: () => void;
     handleUpdateData?: (id: number) => void;
     handleDeleteData?: (id: number) => void;
+    handleClickDetail?: (id: number) => void;
 }
 
 export interface TableProps {
@@ -31,4 +32,8 @@ export interface TableProps {
     handleUpdateData?: (id: number) => void;
     handleDeleteData?: (id: number) => void;
     loading: boolean;
+    handleClickDetail?: (id: number) => void;
+    onSortChange?: (field: string) => void;
+    orderBy? : string;
+    orderDirection? : string
 }
