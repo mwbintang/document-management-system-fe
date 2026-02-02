@@ -21,12 +21,22 @@ const columns = [
   { key: "size", label: "Size" },
 ];
 
+interface NodeItem {
+  id: number;
+  name: string;
+  type: "FILE" | "FOLDER";
+  size: number | null; 
+  created_at: string; 
+  username: string;
+  isBack?: boolean
+};
 
 export default function Page() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const parentIdParam = searchParams.get("parent_id");
   const [search, setSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
@@ -34,7 +44,7 @@ export default function Page() {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [nodes, setNodes] = useState<any[]>([]);
+  const [nodes, setNodes] = useState<NodeItem[]>([]);
   const [openFileModal, setOpenFileModal] = useState<boolean>(false);
   const [openFolderModal, setOpenFolderModal] = useState<boolean>(false);
 
@@ -45,7 +55,9 @@ export default function Page() {
   const [descriptionFile, setDescriptionFile] = useState<string>("");
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
 
-  const [selectedFolderParentId, setSelectedFolderParentId] = useState<number | null>(null);
+  const [selectedFolderParentId, setSelectedFolderParentId] = useState<number | null>(
+    parentIdParam ? Number(parentIdParam) : null
+  );
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const [orderBy, setOrderBy] = useState<string>("");
@@ -183,7 +195,20 @@ export default function Page() {
     try {
       setLoading(true);
       const nodesRespo = await fetchNodes(page, limit, search, selectedFolderParentId, orderBy, orderDirection);
-      setNodes(nodesRespo.data);
+      let data = nodesRespo.data;
+      if (selectedFolderParentId) {
+        data = [
+          {
+            id: -1,
+            name: "...",
+            type: "FOLDER",
+            isBack: true,
+          },
+          ...data,
+        ];
+      };
+
+      setNodes(data);
       setTotalPages(nodesRespo.meta.totalPages);
 
     } catch (error) {
@@ -259,37 +284,30 @@ export default function Page() {
     setFileName("");
   };
 
-
-  // const handleApply = useDebounceFn(() => {
-  //   const params = new URLSearchParams(searchParams.toString());
-
-  //   params.set("search", search || "");
-  //   params.set("page", "1"); // ✅ important: reset page on search
-
-  //   router.push(`${pathname}?${params.toString()}`);
-  // }, 1000);
-
-  // const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setSearch(e.target.value);
-  //   handleApply();
-  // };
-
   const handleClickDetail = async (id: number) => {
     try {
       const detailData = nodes.find((node) => node.id === id);
       if (!detailData) return;
 
-      if (detailData.type === "FOLDER") {
-        setSelectedFolderParentId(id);
+      if (detailData.isBack) {
+        router.back()
+        return;
+      } else if (detailData.type === "FOLDER") {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("parent_id", id.toString());
+
+        router.push(`${pathname}?${params.toString()}`);
       } else if (detailData.type === "FILE") {
-        window.open(`${API_BASE_URL}v1/nodes/${id}/download`, "_blank", "noopener,noreferrer");
-      }
+        window.open(
+          `${API_BASE_URL}v1/nodes/${id}/download`,
+          "_blank",
+          "noopener,noreferrer"
+        );
+      };
     } catch (error) {
       console.error("Error navigating to detail page:", error);
-    } finally {
-
     }
-  }
+  };
 
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) return;
@@ -334,6 +352,10 @@ export default function Page() {
   useEffect(() => {
     fetchData();
   }, [page, limit, search, selectedFolderParentId, orderDirection]);
+
+  useEffect(() => {
+    setSelectedFolderParentId(parentIdParam ? Number(parentIdParam) : null);
+  }, [parentIdParam]);
 
   return (
     <div className="p-6">

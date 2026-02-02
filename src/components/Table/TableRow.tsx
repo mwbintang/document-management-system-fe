@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { TableRowProps } from "./TableProps";
 import { formatDate } from "@/src/lib/date";
 import { ActionDropdown } from "../DropDown/ActionDropDown";
+import { File, Folder } from "lucide-react";
 
 export const TableRow: React.FC<TableRowProps> = ({
   item,
@@ -36,15 +37,38 @@ export const TableRow: React.FC<TableRowProps> = ({
         <input type="checkbox" checked={isSelected} onChange={onSelect} />
       </td>
 
-      {columns.map((col) => (
-        <td
-          key={col.key}
-          className={`border-b border-[#dcdcde] ${handleClickDetail ? 'cursor-pointer' : ''}`}
-          onClick={() => handleClickDetail && handleClickDetail(item.id)}
-        >
-          {col.date ? formatDate(item[col.key]) : item[col.key]}
-        </td>
-      ))}
+      {columns.map((col) => {
+        const isNameColumn = col.key === "name";
+
+        return (
+          <td
+            key={col.key}
+            className={`border-b border-[#dcdcde] ${handleClickDetail && isNameColumn ? "cursor-pointer" : ""
+              }`}
+            onClick={() =>
+              isNameColumn && handleClickDetail && handleClickDetail(item.id)
+            }
+          >
+            {isNameColumn ? (
+              <div className="flex items-center gap-2">
+                {item.type === "FOLDER" && (
+                  <Folder size={16} className="text-yellow-600 shrink-0" />
+                )}
+
+                {item.type === "FILE" && (
+                  <File size={16} className="text-blue-600 shrink-0" />
+                )}
+
+                <span className="truncate">{item[col.key]}</span>
+              </div>
+            ) : col.date ? (
+              formatDate(item[col.key])
+            ) : (
+              item[col.key]
+            )}
+          </td>
+        );
+      })}
 
       {/* Actions */}
       <td className="p-3 border-b border-[#dcdcde] text-right relative">
