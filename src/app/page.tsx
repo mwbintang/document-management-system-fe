@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../components/Button";
 import { HeadTitle } from "../components/HeadTitle";
 import { SearchBar } from "../components/SearchBar";
 import { Table } from "../components/Table/Table";
 import { Plus, Upload } from "lucide-react";
 import { createNodes, deleteNode, deleteNodes, fetchNode, fetchNodes, updateNodes } from "../services/nodes";
-// import { useDebounceFn } from "../lib/hooks/useDebounce";
+import { useDebounceFn } from "../lib/hooks/useDebounce";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { FileFormModal } from "../components/Modal/FileFormModal";
@@ -38,6 +38,8 @@ export default function Page() {
 
   const parentIdParam = searchParams.get("parent_id");
   const [search, setSearch] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>(""); // UI value
+
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -62,7 +64,17 @@ export default function Page() {
 
   const [orderBy, setOrderBy] = useState<string>("");
   const [orderDirection, setOrderDirection] = useState<string>("");
-  const [fileName, setFileName] = useState<string>("")
+  const [fileName, setFileName] = useState<string>("");
+
+  const parentStack = useRef<
+    { parentId: number | null; search: string }[]
+  >([]);
+
+  const debouncedSearch = useDebounceFn((value: string) => {
+    setPage(1);
+    setSearch(value);
+  }, 500);
+
 
   const handleSubmitFolder = async () => {
     try {
@@ -285,27 +297,45 @@ export default function Page() {
   };
 
   const handleClickDetail = async (id: number) => {
-    try {
-      const detailData = nodes.find((node) => node.id === id);
-      if (!detailData) return;
+    const detailData = nodes.find((node) => node.id === id);
+    if (!detailData) return;
 
-      if (detailData.isBack) {
-        router.back()
-        return;
-      } else if (detailData.type === "FOLDER") {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("parent_id", id.toString());
+    // BACK
+    if (detailData.isBack) {
+      const prev = parentStack.current.pop();
+      if (prev) {
+        setSearchInput(prev.search);
+        setSearch(prev.search);
+        setSelectedFolderParentId(prev.parentId);
+      }
+      router.back();
+      return;
+    }
 
-        router.push(`${pathname}?${params.toString()}`);
-      } else if (detailData.type === "FILE") {
-        window.open(
-          `${API_BASE_URL}v1/nodes/${id}/download`,
-          "_blank",
-          "noopener,noreferrer"
-        );
-      };
-    } catch (error) {
-      console.error("Error navigating to detail page:", error);
+    // FOLDER
+    if (detailData.type === "FOLDER") {
+      parentStack.current.push({
+        parentId: selectedFolderParentId,
+        search: search,
+      });
+
+      setSearch("");
+      setSearchInput("");
+      setPage(1);
+
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("parent_id", id.toString());
+      router.push(`${pathname}?${params.toString()}`);
+      return;
+    }
+
+    // FILE
+    if (detailData.type === "FILE") {
+      window.open(
+        `${API_BASE_URL}v1/nodes/${id}/download`,
+        "_blank",
+        "noopener,noreferrer"
+      );
     }
   };
 
@@ -400,7 +430,13 @@ export default function Page() {
       }
 
       <div className="my-3 px-2">
-        <SearchBar value={search} onChange={setSearch} />
+        <SearchBar
+          value={searchInput}
+          onChange={(value) => {
+            setSearchInput(value);
+            debouncedSearch(value);
+          }}
+        />
       </div>
 
       <div className="my-3 min-h-10 px-2">
