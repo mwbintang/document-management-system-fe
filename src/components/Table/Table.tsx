@@ -55,7 +55,7 @@ export const Table: React.FC<TableProps> = ({
     <div className="overflow-x-auto">
       <div className="rounded-xl border-t border-r border-l border-gray-200">
         <table className="w-full shadow-sm">
-          <thead className="bg-[#00195c]">
+          <thead className="bg-dark-blue">
             <tr>
               <th className="p-3 text-left">
                 <input
@@ -69,7 +69,7 @@ export const Table: React.FC<TableProps> = ({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`border-b border-[#dcdcde] text-center text-white font-medium ${col.sortable ? "cursor-pointer select-none" : ""
+                  className={`border-b border-primary-grey text-center text-white font-medium ${col.sortable ? "cursor-pointer select-none" : ""
                     }`}
                   onClick={() =>
                     col.sortable && onSortChange && onSortChange(col.key)

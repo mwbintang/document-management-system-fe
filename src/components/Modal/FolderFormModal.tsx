@@ -27,7 +27,7 @@ export const FolderFormModal: React.FC<FolderFormModalProps> = ({
         }}
       >
         {/* Header */}
-        <div className="bg-[#00195c] text-white px-4 py-3 font-medium">
+        <div className="bg-dark-blue text-white px-4 py-3 font-medium">
           {title}
         </div>
 

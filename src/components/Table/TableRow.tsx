@@ -33,7 +33,7 @@ export const TableRow: React.FC<TableRowProps> = ({
 
   return (
     <tr className="hover:bg-gray-50 bg-white">
-      <td className="p-3 border-b border-[#dcdcde]">
+      <td className="p-3 border-b border-primary-grey">
         <input type="checkbox" checked={isSelected} onChange={onSelect} />
       </td>
 
@@ -43,7 +43,7 @@ export const TableRow: React.FC<TableRowProps> = ({
         return (
           <td
             key={col.key}
-            className={`border-b border-[#dcdcde] ${handleClickDetail && isNameColumn ? "cursor-pointer" : ""
+            className={`border-b border-primary-grey ${handleClickDetail && isNameColumn ? "cursor-pointer" : ""
               }`}
             onClick={() =>
               isNameColumn && handleClickDetail && handleClickDetail(item.id)
@@ -71,7 +71,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       })}
 
       {/* Actions */}
-      <td className="p-3 border-b border-[#dcdcde] text-right relative">
+      <td className="p-3 border-b border-primary-grey text-right relative">
         <div ref={dropdownRef} className="inline-block text-left">
           <button
             className="px-2 py-1 text-gray-500 cursor-pointer hover:text-black"

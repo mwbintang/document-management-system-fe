@@ -32,7 +32,7 @@ export const FileFormModal: React.FC<FileFormModalProps> = ({
         }}
       >
         {/* Header */}
-        <div className="bg-[#00195c] text-white px-4 py-3 font-medium">
+        <div className="bg-dark-blue text-white px-4 py-3 font-medium">
           {title ?? (isCreate ? "Upload File" : "Update File")}
         </div>
 

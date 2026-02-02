@@ -16,7 +16,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
   return (
     <div
       ref={ref}
-      className="absolute right-0 mt-2 w-32 rounded-md bg-white border border-[#dcdcde] shadow-lg z-50"
+      className="absolute right-0 mt-2 w-32 rounded-md bg-white border border-primary-grey shadow-lg z-50"
     >
       {onUpdate && (
         <button

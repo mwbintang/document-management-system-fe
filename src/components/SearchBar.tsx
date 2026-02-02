@@ -21,7 +21,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-[#dcdcde] px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-1 focus:ring-black"
+        className="w-full rounded-md border border-primary-grey px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-1 focus:ring-black"
       />
 
       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">

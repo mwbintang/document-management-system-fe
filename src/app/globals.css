@@ -10,6 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-indigo-deep: #0908b6;
+  --color-indigo-soft: #7272d5;
+  --color-indigo-text: #2f2fc0;
+  --color-off-white: #f9fafc;
+  --color-test-red: #ff0000;
+  --color-primary-grey: #dcdcde;
+  --color-dark-blue: #00195c;
 }
 
 @media (prefers-color-scheme: dark) {

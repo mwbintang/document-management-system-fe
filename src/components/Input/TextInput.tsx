@@ -28,7 +28,7 @@ export const TextInput: React.FC<TextInputProps> = ({
   type = "text",
 }) => {
   const baseClass =
-    "w-full rounded-md border border-[#dcdcde] px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black disabled:opacity-50";
+    "w-full rounded-md border border-primary-grey px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black disabled:opacity-50";
 
   return (
     <div className="space-y-1">

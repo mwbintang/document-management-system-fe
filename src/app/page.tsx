@@ -25,8 +25,8 @@ interface NodeItem {
   id: number;
   name: string;
   type: "FILE" | "FOLDER";
-  size: number | null; 
-  created_at: string; 
+  size: number | null;
+  created_at: string;
   username: string;
   isBack?: boolean
 };
@@ -363,8 +363,8 @@ export default function Page() {
         title="Documents"
         rightSlot={
           <div className="flex flex-row gap-x-5">
-            <Button label="Upload files" icon={<Upload size={16} />} className="border border-[#7272d5] bg-[#f9fafc]! text-[#2f2fc0]!" onClick={() => setOpenFileModal(true)} />
-            <Button label="Add new folder" icon={<Plus size={16} />} className="bg-[#0908b6]! text-white" onClick={() => setOpenFolderModal(true)} />
+            <Button label="Upload files" icon={<Upload size={16} />} className="border border-indigo-soft bg-off-white text-indigo-text" onClick={() => setOpenFileModal(true)} />
+            <Button label="Add new folder" icon={<Plus size={16} />} className="bg-indigo-deep text-white" onClick={() => setOpenFolderModal(true)} />
           </div>
         }
       />
@@ -403,14 +403,9 @@ export default function Page() {
         <SearchBar value={search} onChange={setSearch} />
       </div>
 
-      <div className="my-3 min-h-[40px] px-2">
+      <div className="my-3 min-h-10 px-2">
         {selectedIds.length > 0 && (
-          <button
-            onClick={handleDeleteSelected}
-            className="px-2 py-1 text-md rounded bg-red-900 text-white hover:bg-red-800"
-          >
-            Delete Selected ({selectedIds.length})
-          </button>
+          <Button label={`Delete Selected (${selectedIds.length})`} className="px-2 py-1 text-md rounded bg-red-700 text-white hover:bg-red-600" onClick={() => handleDeleteSelected()} />
         )}
       </div>
 

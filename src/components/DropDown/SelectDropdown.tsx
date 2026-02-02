@@ -19,7 +19,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
     <select
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
-      className={`border border-[#dcdcde] rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-black ${className}`}
+      className={`border border-primary-grey rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-black ${className}`}
     >
       {options.map((option) => (
         <option key={option} value={option}>
