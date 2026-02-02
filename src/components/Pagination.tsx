@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { SelectDropdown } from "./DropDown/SelectDropdown";
 
 const PAGE_WINDOW = 5;
 
@@ -19,12 +20,9 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   onLimitChange,
 }) => {
-  // if (totalPages <= 1) return null;
 
   const [startPage, setStartPage] = useState(1);
-  // const [endPage, setEndPage] = useState(Math.min(PAGE_WINDOW, totalPages));
 
-  // Keep window in sync when page jumps (first / last / external change)
   useEffect(() => {
     if (page < startPage) {
       setStartPage(page);
@@ -44,26 +42,20 @@ export const Pagination: React.FC<PaginationProps> = ({
   );
 
   return (
-    <div className="flex items-center justify-between mt-4">
+    <div className="flex items-center justify-between mt-10 mb-3 z-0">
       {/* Limit */}
-      <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 pl-7">
         <span>Show</span>
-        <select
-          value={limit}
-          onChange={(e) => onLimitChange(Number(e.target.value))}
-          className="border rounded-md px-2 py-1"
-        >
-          {[1, 2, 3, 10, 20, 50].map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
-        <span>entries</span>
-      </div>
+          <SelectDropdown
+            value={limit}
+            options={[1, 2, 3, 10, 20, 50]}
+            onChange={onLimitChange}
+          />
+          <span className="text-md text-gray-600">entries</span>
+        </div>
 
       {/* Pagination */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 pr-7">
         {/* First */}
         <button
           disabled={page === 1}
@@ -89,11 +81,10 @@ export const Pagination: React.FC<PaginationProps> = ({
           <button
             key={p}
             onClick={() => onPageChange(p)}
-            className={`px-3 py-1 rounded border text-sm ${
-              page === p
-                ? "bg-black text-white"
-                : "hover:bg-gray-100"
-            }`}
+            className={`px-3 py-1 rounded border text-sm ${page === p
+              ? "bg-black text-white"
+              : "hover:bg-gray-100"
+              }`}
           >
             {p}
           </button>

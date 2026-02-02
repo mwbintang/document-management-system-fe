@@ -20,4 +20,5 @@ export interface FileFormModalProps {
   onDescriptionChange: (value: string) => void;
   onSubmit: () => void;
   onCancel: () => void;
+  fileName?: string;
 }

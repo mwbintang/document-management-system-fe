@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { TableRowProps } from "./TableProps";
 import { formatDate } from "@/src/lib/date";
+import { ActionDropdown } from "../DropDown/ActionDropDown";
 
 export const TableRow: React.FC<TableRowProps> = ({
   item,
@@ -29,28 +30,16 @@ export const TableRow: React.FC<TableRowProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // const handleUpdate = () => {
-  //   setOpen(false);
-  //   console.log("Update:", item.id);
-  //   // 👉 open update modal here
-  // };
-
-  // const handleDelete = () => {
-  //   setOpen(false);
-  //   console.log("Delete:", item.id);
-  //   // 👉 open confirm delete modal here
-  // };
-
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="p-3 border-b">
+    <tr className="hover:bg-gray-50 bg-white">
+      <td className="p-3 border-b border-[#dcdcde]">
         <input type="checkbox" checked={isSelected} onChange={onSelect} />
       </td>
 
       {columns.map((col) => (
         <td
           key={col.key}
-          className={`p-3 border-b ${handleClickDetail ? 'cursor-pointer' : ''}`}
+          className={`border-b border-[#dcdcde] ${handleClickDetail ? 'cursor-pointer' : ''}`}
           onClick={() => handleClickDetail && handleClickDetail(item.id)}
         >
           {col.date ? formatDate(item[col.key]) : item[col.key]}
@@ -58,7 +47,7 @@ export const TableRow: React.FC<TableRowProps> = ({
       ))}
 
       {/* Actions */}
-      <td className="p-3 border-b text-right relative">
+      <td className="p-3 border-b border-[#dcdcde] text-right relative">
         <div ref={dropdownRef} className="inline-block text-left">
           <button
             className="px-2 py-1 text-gray-500 cursor-pointer hover:text-black"
@@ -68,21 +57,10 @@ export const TableRow: React.FC<TableRowProps> = ({
           </button>
 
           {open && (
-            <div className="absolute right-0 mt-2 w-32 rounded-md border bg-white shadow-lg z-50">
-              <button
-                onClick={() => handleUpdateData && handleUpdateData(item.id)}
-                className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
-              >
-                Update
-              </button>
-
-              <button
-                onClick={handleDeleteData ? () => handleDeleteData(item.id) : () => { }}
-                className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-              >
-                Delete
-              </button>
-            </div>
+            <ActionDropdown
+              onUpdate={() => handleUpdateData?.(item.id)}
+              onDelete={() => handleDeleteData?.(item.id)}
+            />
           )}
         </div>
       </td>

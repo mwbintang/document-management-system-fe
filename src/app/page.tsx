@@ -5,12 +5,9 @@ import { Button } from "../components/Button";
 import { HeadTitle } from "../components/HeadTitle";
 import { SearchBar } from "../components/SearchBar";
 import { Table } from "../components/Table/Table";
-import { Pagination } from "../components/Pagination";
-import { Input } from "../components/Input";
-import { Modal } from "../components/Modal";
 import { Plus, Upload } from "lucide-react";
 import { createNodes, deleteNode, deleteNodes, fetchNode, fetchNodes, updateNodes } from "../services/nodes";
-import { useDebounceFn } from "../lib/hooks/useDebounce";
+// import { useDebounceFn } from "../lib/hooks/useDebounce";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { FileFormModal } from "../components/Modal/FileFormModal";
@@ -38,8 +35,6 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [nodes, setNodes] = useState<any[]>([]);
-  // const [open, setOpen] = useState<boolean>(false);
-  // const [name, setName] = useState<string>("");
   const [openFileModal, setOpenFileModal] = useState<boolean>(false);
   const [openFolderModal, setOpenFolderModal] = useState<boolean>(false);
 
@@ -55,20 +50,21 @@ export default function Page() {
 
   const [orderBy, setOrderBy] = useState<string>("");
   const [orderDirection, setOrderDirection] = useState<string>("");
+  const [fileName, setFileName] = useState<string>("")
 
   const handleSubmitFolder = async () => {
     try {
       setLoading(true);
 
       if (selectedNodeId) {
-        // Update existing folder logic can be added here
+
         await updateNodes(selectedNodeId, {
           name: folderName,
           description: folderDescription
         });
 
-        setPage(1); // reset to first page
-        setSearch(""); // reset search
+        setPage(1);
+        setSearch("");
 
         await fetchData();
 
@@ -87,8 +83,8 @@ export default function Page() {
         parent_id: selectedFolderParentId,
       });
 
-      setPage(1); // reset to first page
-      setSearch(""); // reset search
+      setPage(1);
+      setSearch("");
 
       await fetchData();
 
@@ -109,7 +105,7 @@ export default function Page() {
       setLoading(true);
 
       const formData = new FormData();
-      formData.append("file", selectedFile); // must match multer field name
+      formData.append("file", selectedFile);
       formData.append("type", "FILE");
       formData.append("description", descriptionFile);
       if (selectedFolderParentId) {
@@ -118,8 +114,8 @@ export default function Page() {
 
       await createNodes(formData);
 
-      setPage(1); // reset to first page
-      setSearch(""); // reset search
+      setPage(1);
+      setSearch("");
 
       await fetchData();
 
@@ -141,15 +137,15 @@ export default function Page() {
 
       const formData = new FormData();
       if (selectedFile) {
-        formData.append("file", selectedFile); // must match multer field name
+        formData.append("file", selectedFile);
       }
 
       formData.append("description", descriptionFile);
 
       await updateNodes(selectedNodeId, formData);
 
-      setPage(1); // reset to first page
-      setSearch(""); // reset search
+      setPage(1);
+      setSearch("");
 
       await fetchData();
 
@@ -169,23 +165,18 @@ export default function Page() {
   const handleSaveFile = (file: File | null) => {
     if (!file) {
       setSelectedFile(null);
+      setFileName(""); // reset filename
       return;
     }
 
-    // Optional validations
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       alert("File size must be under 10MB");
       return;
     }
 
-    // Optional type check
-    // if (!file.type.startsWith("image/")) {
-    //   alert("Only images allowed");
-    //   return;
-    // }
-
     setSelectedFile(file);
+    setFileName(file.name); // ✅ store filename
   };
 
   const fetchData = async () => {
@@ -222,7 +213,8 @@ export default function Page() {
       if (node.type === "FILE") {
         // ✅ File update flow
         setDescriptionFile(node.description || "");
-        setSelectedFile(null); // optional: keep null to mean "keep existing file"
+        setSelectedFile(null);
+        setFileName(node.name || "")
         setOpenFileModal(true);
         return;
       }
@@ -264,6 +256,7 @@ export default function Page() {
     setSelectedFile(null);
     setDescriptionFile("");
     setSelectedNodeId(null);
+    setFileName("");
   };
 
 
@@ -347,10 +340,10 @@ export default function Page() {
       <HeadTitle
         title="Documents"
         rightSlot={
-          <>
-            <Button label="Upload files" icon={<Upload size={16} />} onClick={() => setOpenFileModal(true)} />
-            <Button label="Add new folder" icon={<Plus size={16} />} onClick={() => setOpenFolderModal(true)} />
-          </>
+          <div className="flex flex-row gap-x-5">
+            <Button label="Upload files" icon={<Upload size={16} />} className="border border-[#7272d5] bg-[#f9fafc]! text-[#2f2fc0]!" onClick={() => setOpenFileModal(true)} />
+            <Button label="Add new folder" icon={<Plus size={16} />} className="bg-[#0908b6]! text-white" onClick={() => setOpenFolderModal(true)} />
+          </div>
         }
       />
 
@@ -364,6 +357,7 @@ export default function Page() {
             onFileChange={handleSaveFile}
             onDescriptionChange={(e) => setDescriptionFile(e)}
             loading={loading}
+            fileName={fileName}
           />
         )
       }
@@ -383,33 +377,40 @@ export default function Page() {
         )
       }
 
-      <SearchBar value={search} onChange={setSearch} />
+      <div className="my-3 px-2">
+        <SearchBar value={search} onChange={setSearch} />
+      </div>
 
-      {selectedIds.length > 0 && <button
-        disabled={selectedIds.length === 0}
-        onClick={handleDeleteSelected}
-        className="px-3 py-2 rounded bg-red-600 text-white disabled:opacity-50"
-      >
-        Delete Selected ({selectedIds.length})
-      </button>}
+      <div className="my-3 min-h-[40px] px-2">
+        {selectedIds.length > 0 && (
+          <button
+            onClick={handleDeleteSelected}
+            className="px-2 py-1 text-md rounded bg-red-900 text-white hover:bg-red-800"
+          >
+            Delete Selected ({selectedIds.length})
+          </button>
+        )}
+      </div>
 
-      <Table
-        columns={columns}
-        data={nodes}
-        onSelectionChange={handleSelectionChange}
-        onPageChange={setPage}
-        onLimitChange={limitHandleChange}
-        page={page}
-        limit={limit}
-        totalPages={totalPages}
-        handleUpdateData={handleUpdateData}
-        handleDeleteData={handleDeleteData}
-        loading={loading}
-        handleClickDetail={handleClickDetail}
-        onSortChange={handleSort}
-        orderBy={orderBy}
-        orderDirection={orderDirection}
-      />
+      <div>
+        <Table
+          columns={columns}
+          data={nodes}
+          onSelectionChange={handleSelectionChange}
+          onPageChange={setPage}
+          onLimitChange={limitHandleChange}
+          page={page}
+          limit={limit}
+          totalPages={totalPages}
+          handleUpdateData={handleUpdateData}
+          handleDeleteData={handleDeleteData}
+          loading={loading}
+          handleClickDetail={handleClickDetail}
+          onSortChange={handleSort}
+          orderBy={orderBy}
+          orderDirection={orderDirection}
+        />
+      </div>
     </div>
   );
 }

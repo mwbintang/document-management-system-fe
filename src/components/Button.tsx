@@ -1,43 +1,63 @@
 "use client";
 
-import Image from "next/image";
 import React from "react";
+import { Loading } from "./Loading";
 
 interface ButtonProps {
   label: string;
   onClick?: () => void;
-  icon?: React.ReactNode;
-  imageAlt?: string;
+  type?: "button" | "submit";
+  loading?: boolean;
   disabled?: boolean;
-  variant?: "primary" | "secondary";
+  icon?: React.ReactNode;
+  variant?: "primary" | "secondary" | "danger" | "submit" | "none";
+  className?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   label,
   onClick,
-  icon,
-  imageAlt = "button icon",
+  type = "button",
+  loading = false,
   disabled = false,
-  variant = "primary",
+  icon,
+  variant = "none",
+  className = "",
 }) => {
+  const isDisabled = disabled || loading;
+
   const baseStyle =
-    "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition";
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition focus:outline-none";
 
   const variants = {
-    primary: "bg-black text-white hover:bg-gray-800",
-    secondary: "bg-gray-100 text-black hover:bg-gray-200",
+    primary: "bg-black! text-white hover:bg-gray-800!",
+    secondary: "bg-gray-100! text-black hover:bg-gray-200!",
+    danger: "bg-red-600! text-white hover:bg-red-700!",
+    submit: "bg-blue-600! text-white hover:bg-blue-700!",
+    none: ""
   };
 
   return (
     <button
+      type={type}
       onClick={onClick}
-      disabled={disabled}
-      className={`${baseStyle} ${variants[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""
-        }`}
+      disabled={isDisabled}
+      className={`
+        ${baseStyle}
+        ${variants[variant]}
+        ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}
+        ${className}
+        cursor-pointer
+      `}
     >
-      {icon && <span className="flex items-center">{icon}</span>}
+      {/* Loading has priority */}
+      {loading ? (
+        <Loading size="sm" />
+      ) : (
+        icon && <span className="flex items-center">{icon}</span>
+      )}
 
-      {label}
+      <span>{label}</span>
     </button>
   );
 };

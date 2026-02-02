@@ -1,14 +1,8 @@
-// import { encryptPayload } from "./crypto-utils";
-
 import { API_BASE_URL } from "./constants/env";
-
-// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-// const AES_KEY = process.env.NEXT_PUBLIC_AES_HEX_KEY;
-// const HMAC_KEY = process.env.NEXT_PUBLIC_HMAC_KEY;
 
 export interface ApiClientOptions extends RequestInit {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  body?: any; // can be plain object
+  body?: any;
   file?: boolean;
 }
 
@@ -48,11 +42,10 @@ export async function apiClient(
     throw new Error(errorMsg);
   }
 
-  // ✅ SAFE RESPONSE HANDLING
   const contentType = res.headers.get("content-type");
   if (contentType?.includes("application/json")) {
     return await res.json();
   }
 
-  return null; // DELETE / empty response
+  return null;
 }

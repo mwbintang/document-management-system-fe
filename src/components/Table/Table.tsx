@@ -5,6 +5,7 @@ import { TableRow } from "./TableRow";
 import { TableProps } from "./TableProps";
 import { Pagination } from "../Pagination";
 import { Loading } from "../Loading";
+import { ArrowDownNarrowWideIcon, ArrowUpNarrowWideIcon } from "lucide-react";
 
 export const Table: React.FC<TableProps> = ({
   columns,
@@ -44,85 +45,87 @@ export const Table: React.FC<TableProps> = ({
   };
 
   const getSortIcon = (key: string) => {
-    if (orderBy !== key) return "↓";
-    return orderDirection === "ASC" ? "↓" : "↑";
+    const className = "w-4 h-4 text-white";
+
+    if (orderBy !== key) return <ArrowDownNarrowWideIcon className={className}/>;
+    return orderDirection === "ASC" ? <ArrowDownNarrowWideIcon className={className}/> : <ArrowUpNarrowWideIcon className={className}/>;
   };
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border border-gray-200 rounded-lg">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-3 border-b text-left">
-              <input
-                type="checkbox"
-                checked={isAllSelected}
-                onChange={toggleSelectAll}
-                disabled={loading}
-              />
-            </th>
-
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={`p-3 border-b text-left font-medium ${col.sortable ? "cursor-pointer select-none" : ""
-                  }`}
-                onClick={() =>
-                  col.sortable && onSortChange && onSortChange(col.key)
-                }
-              >
-                <div className="flex items-center gap-1">
-                  {col.label}
-                  {col.sortable && (
-                    <span className="text-xs text-gray-500">
-                      {getSortIcon(col.key)}
-                    </span>
-                  )}
-                </div>
+      <div className="rounded-xl border-t border-r border-l border-gray-200">
+        <table className="w-full shadow-sm">
+          <thead className="bg-[#00195c]">
+            <tr>
+              <th className="p-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={toggleSelectAll}
+                  disabled={loading}
+                />
               </th>
-            ))}
 
-            <th className="p-3 border-b text-right w-10" />
-          </tr>
-        </thead>
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  className={`border-b border-[#dcdcde] text-center text-white font-medium ${col.sortable ? "cursor-pointer select-none" : ""
+                    }`}
+                  onClick={() =>
+                    col.sortable && onSortChange && onSortChange(col.key)
+                  }
+                >
+                  <div className="flex items-center gap-3">
+                    {col.label}
+                    {col.sortable && (
+                        getSortIcon(col.key)
+                    )}
+                  </div>
+                </th>
+              ))}
 
-        <tbody>
-          {loading && (
-            <tr>
-              <td colSpan={columns.length + 2} className="h-40">
-                <div className="flex items-center justify-center h-full">
-                  <Loading size="lg" />
-                </div>
-              </td>
+              <th className="p-3 text-right w-10" />
             </tr>
-          )}
+          </thead>
 
-          {!loading &&
-            data.map((item) => (
-              <TableRow
-                key={item.id}
-                item={item}
-                columns={columns}
-                isSelected={selectedIds.includes(item.id)}
-                onSelect={() => toggleSelectOne(item.id)}
-                handleUpdateData={handleUpdateData}
-                handleDeleteData={handleDeleteData}
-                handleClickDetail={handleClickDetail}
-              />
-            ))}
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={columns.length + 2} className="h-40">
+                  <div className="flex items-center justify-center h-full">
+                    <Loading size="lg" />
+                  </div>
+                </td>
+              </tr>
+            )}
 
-          {!loading && data.length === 0 && (
-            <tr>
-              <td
-                colSpan={columns.length + 2}
-                className="py-10 text-center text-gray-500"
-              >
-                No data available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            {!loading &&
+              data.map((item) => (
+                <TableRow
+                  key={item.id}
+                  item={item}
+                  columns={columns}
+                  isSelected={selectedIds.includes(item.id)}
+                  onSelect={() => toggleSelectOne(item.id)}
+                  handleUpdateData={handleUpdateData}
+                  handleDeleteData={handleDeleteData}
+                  handleClickDetail={handleClickDetail}
+                />
+              ))}
+
+            {!loading && data.length === 0 && (
+              <tr>
+                <td
+                  colSpan={columns.length + 2}
+                  className="py-10 text-center text-gray-500"
+                >
+                  No data available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {!loading && (
         <Pagination

@@ -2,6 +2,12 @@
 
 import React from "react";
 import { FileFormModalProps } from "./ModalProps";
+import { Loading } from "../Loading";
+import { Modal } from "./Modal";
+import { TextInput } from "../Input/TextInput";
+import { Upload } from "lucide-react";
+import { Button } from "../Button";
+import { FileInput } from "../Input/FileInput";
 
 export const FileFormModal: React.FC<FileFormModalProps> = ({
   mode = "create",
@@ -13,91 +19,64 @@ export const FileFormModal: React.FC<FileFormModalProps> = ({
   onDescriptionChange,
   onSubmit,
   onCancel,
+  fileName
 }) => {
   const isCreate = mode === "create";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onCancel}
-      />
-
+    <Modal onClose={onCancel}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit();
         }}
-        className="relative w-full max-w-md rounded-lg bg-white shadow-lg"
       >
         {/* Header */}
-        <div className="border-b px-4 py-3 font-medium">
+        <div className="bg-[#00195c] text-white px-4 py-3 font-medium">
           {title ?? (isCreate ? "Upload File" : "Update File")}
         </div>
 
         {/* Body */}
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 mt-1">
           {/* File input */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">
-              File {isCreate ? "" : "(optional)"}
-            </label>
+          <FileInput
+            label={`File ${isCreate ? "" : "(optional)"}`}
+            required={isCreate}
+            onFileChange={onFileChange}
+            fileName={fileName}
+            helperText={
+              !isCreate ? "Click image to change file" : undefined
+            }
+          />
 
-            <input
-              type="file"
-              onChange={(e) =>
-                onFileChange(e.target.files?.[0] ?? null)
-              }
-              className="w-full text-sm"
-              required={isCreate}
-            />
+          <TextInput
+            label="Description"
+            value={description}
+            onChange={onDescriptionChange}
+            placeholder="Optional description..."
+            textarea
+          />
 
-            {!isCreate && (
-              <p className="text-xs text-gray-500">
-                Leave empty to keep the existing file
-              </p>
-            )}
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => onDescriptionChange(e.target.value)}
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              rows={3}
-              placeholder="Optional description..."
-            />
-          </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t px-4 py-3 flex justify-end gap-2">
-          <button
-            type="button"
+        <div className="px-4 py-3 flex justify-end gap-2">
+          <Button
+            label="Cancel"
+            variant="secondary"
             onClick={onCancel}
-            className="px-4 py-2 rounded-md border text-sm"
-          >
-            Cancel
-          </button>
+          />
 
-          <button
+          <Button
             type="submit"
-            disabled={loading || (isCreate && !file)}
-            className="px-4 py-2 rounded-md border text-sm disabled:opacity-50"
-          >
-            {loading
-              ? isCreate
-                ? "Uploading..."
-                : "Updating..."
-              : isCreate
-              ? "Upload"
-              : "Update"}
-          </button>
+            label={isCreate ? "Upload" : "Update"}
+            icon={<Upload size={16} />}
+            loading={loading}
+            disabled={isCreate && !file}
+            variant="submit"
+          />
         </div>
       </form>
-    </div>
+    </Modal>
   );
 };
